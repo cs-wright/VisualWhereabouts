@@ -6,6 +6,7 @@ import TreeItem from '@mui/lab/TreeItem';
 import axios from 'axios';
 import SelectButtonGroup from './SelectButtonGroup';
 import EmployeeList from "./EmployeeList";
+import TimelineView from './TimelineView';
 
 const baseURL = 'https://whowhatwhere.azurewebsites.net';
 
@@ -23,6 +24,12 @@ export default function HierarchyExplorer(hierarchyURI) {
   const handleSelectSubGroup = (event, nodeIds) => {
     setSelectedSubGroup(nodeIds);
   };
+
+  // Declare a state used to store what view the user should be presented with.
+  const [selectedView, setSelectedView] = React.useState('Gallery');
+
+
+
 
   // Request the contents of the selected hierarchy from the API.
   React.useEffect(() => {
@@ -42,10 +49,35 @@ export default function HierarchyExplorer(hierarchyURI) {
                     : null}
     </TreeItem>
   );
+
+  const viewLeftValue = "Gallery";
+  const viewLeftName = "Gallery";
+  const viewRightName = "Timeline";
+  const viewRightValue = "Timeline";
   
+  const hierarchyLeftValue = "/api/teams/hierarchy";
+  const hierarchyLeftName = "Teams";
+  const hierarchyRightValue = "/api/locations/hierarchy";
+  const hierarchyRightName = "Loactions";
+  
+
+  let viewToRender;
+
+  if (selectedView === "Gallery"){
+    viewToRender =  <EmployeeList {... { selectedSubGroup , selectedButton} } />;
+  }
+  else if ( selectedView === "Timeline"){
+    viewToRender = <TimelineView {... { selectedSubGroup , selectedButton} } />
+  }
+  else{
+    viewToRender = <h2>Error! - Invalid view selected!</h2>
+  }
+
+
   return (
     <>
-      <SelectButtonGroup  {... {selectedButton, setSelectedButton } }/>
+      <SelectButtonGroup  {... {selectedButton:selectedView, setSelectedButton:setSelectedView, leftValue:viewLeftValue, leftName:viewLeftName, rightValue:viewRightValue, rightName:viewRightName} }/>
+      <SelectButtonGroup  {... {selectedButton:selectedButton, setSelectedButton:setSelectedButton, leftValue:hierarchyLeftValue, leftName:hierarchyLeftName, rightValue:hierarchyRightValue, rightName:hierarchyRightName} }/>
       <TreeView
         aria-label="controlled"
         defaultCollapseIcon={<ExpandMoreIcon />}
@@ -57,7 +89,8 @@ export default function HierarchyExplorer(hierarchyURI) {
       >
         {renderTree(hierarchyContents)}
       </TreeView>
-      <EmployeeList {... { selectedSubGroup , selectedButton} } />
+
+      {viewToRender}
     </>
   );
 }

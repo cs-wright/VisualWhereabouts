@@ -1,0 +1,49 @@
+@import url("https://fonts.googleapis.com/css?family=Work+Sans");
+
+body {
+  font-family: "Work Sans", sans-serif;
+  font-size: 18px;
+  background: #fafafa;
+}
+
+
+.react-calendar-timeline .rct-horizontal-lines .rct-hl-even,
+.react-calendar-timeline .rct-horizontal-lines .rct-hl-odd {
+  border-bottom: none;
+}
+
+.react-calendar-timeline .rct-horizontal-lines .rct-hl-even {
+  background-color: #c0dae6;
+}
+
+.react-calendar-timeline .rct-sidebar .rct-sidebar-row {
+  border-bottom: none;
+}
+
+.react-calendar-timeline .rct-header .rct-label {
+  border-bottom: none;
+}
+
+.react-calendar-timeline .rct-vertical-lines .rct-vl.rct-vl-first {
+  border-color: rgb(47,135,175);
+
+}
+
+.react-calendar-timeline .rct-vertical-lines .rct-vl {
+  border-left: 1px solid rgb(156,156,159);
+}
+
+
+
+.rct-calendar-header .rct-dateHeader-primary {
+  background: rgb(47,135,175);
+  color: #ffffff;
+  text-align: center;
+  border: none;
+  border-right: solid 2px #ccc !important;
+}
+
+.react-calendar-timeline .rct-header-root{
+  background:  rgb(47,135,175);
+}
+

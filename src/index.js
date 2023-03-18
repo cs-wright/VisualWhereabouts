@@ -7,10 +7,12 @@ import "bootstrap/dist/js/bootstrap.bundle.min";
 
 import HierarchyExplorer from "./components/HierarchyExplorer";
 
+
 const root = createRoot(document.getElementById("root"));
 root.render(
   <StrictMode>
     <HierarchyExplorer />
+    
     
   </StrictMode>
 );

@@ -2,8 +2,7 @@ import React from 'react';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-export default function SelectButtonGroup( { selectedButton, setSelectedButton } ) {
-
+export default function SelectButtonGroup( { selectedButton, setSelectedButton, leftValue, leftName, rightValue, rightName } ) {
   const handleChange = (event, newSelection) => {
     if (newSelection !== null) {
         setSelectedButton(newSelection);
@@ -11,7 +10,7 @@ export default function SelectButtonGroup( { selectedButton, setSelectedButton }
   };
 
   if (selectedButton == null ){
-    setSelectedButton("/api/teams/hierarchy");
+    setSelectedButton(leftValue);
   }
 
   return (
@@ -23,8 +22,8 @@ export default function SelectButtonGroup( { selectedButton, setSelectedButton }
         onChange={handleChange}
         aria-label="Platform"
         >
-        <ToggleButton value="/api/teams/hierarchy">Teams</ToggleButton>
-        <ToggleButton value="/api/locations/hierarchy">Locations</ToggleButton>
+        <ToggleButton value={leftValue}>{leftName}</ToggleButton>
+        <ToggleButton value={rightValue}>{rightName}</ToggleButton>
       </ToggleButtonGroup>
     </>
   );
