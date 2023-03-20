@@ -6,13 +6,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 
 import HierarchyExplorer from "./components/HierarchyExplorer";
-
+import ResponsiveSidebar from "./components/ResponsiveSidebar";
 
 const root = createRoot(document.getElementById("root"));
 root.render(
   <StrictMode>
-    <HierarchyExplorer />
-    
-    
+    <ResponsiveSidebar />
   </StrictMode>
 );

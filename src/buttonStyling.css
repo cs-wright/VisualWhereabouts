@@ -1,0 +1,7 @@
+.drawerButtons {
+  align-items: center;
+  display: flex;
+  align-content: space-around;
+  /* justify-content: space-between; */
+  flex-direction: column-reverse;
+}
