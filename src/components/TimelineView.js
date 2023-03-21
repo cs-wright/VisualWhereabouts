@@ -9,13 +9,32 @@ import moment from "moment";
 import axios from "axios";
 import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
 
 const baseURL = "https://whowhatwhere.azurewebsites.net";
+
+function getStartOfWeek(today) {
+  today = new Date(today);
+  var day = today.getDay(),
+    diff = today.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
+
+  return new Date(today.setDate(diff)).setHours(0, 0, 0, 0);
+}
 
 export default function TimelineView({ selectedSubGroup, selectedButton }) {
   const [locationSchedule, setLocationSchedule] = React.useState([]);
   const [employeeIDs, setEmployeeIDs] = React.useState([]);
-  // const [lookupStatusID, setLookupStatusID] = React.useState();
+
+  // Default view is the current work week (Monday -> Friday)
+  const defaultTimeStart = getStartOfWeek(new Date());
+  const defaultTimeEnd = new Date(
+    defaultTimeStart + 4 * 24 * 60 * 60 * 1000
+  ).setHours(24, 0, 0, 0);
+
+  const [visibleTimeStart, setVisibleTimeStart] =
+    React.useState(defaultTimeStart);
+  const [visibleTimeEnd, setVisibleTimeEnd] = React.useState(defaultTimeEnd);
 
   // Defines the height of each row used to display the employees schedules.
   const lineHeight = 50;
@@ -66,7 +85,11 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
         setEmployeeIDs(
           data.map((x) => {
             const image = baseURL + x.imgPathContactable;
-            return { id: x.id, title: x.alias, image: image };
+            return {
+              id: x.id,
+              title: x.alias,
+              image: image,
+            };
           })
         );
 
@@ -92,6 +115,8 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
                 end_time: Date.parse(y.endDtm),
                 canChangeGroup: false, // Ensures that the user can't move a work status on their timeline to another users schedule.
                 isContactable: false,
+                canMove: false,
+                canResize: false,
               };
             });
             return timelineItems;
@@ -115,7 +140,7 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
     const { left: leftResizeProps, right: rightResizeProps } = getResizeProps();
     //NOTE: Component requires that the background colour changes when a item is selected.
     //      Colour RGB minor change is required (not noticeable to the naked eye).
-    const bgColour = item.isContactable
+    const bgColour = !(item.title === "Somewhere...")
       ? "rgb(59, 140, 58)"
       : "rgb(140, 58, 59)";
     const backgroundColor = itemContext.selected
@@ -164,18 +189,90 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
     );
   };
 
+  let todayMinusTwoMonths = getStartOfWeek(
+    new Date().setMonth(new Date(defaultTimeStart).getMonth() - 2)
+  );
+  let todayPlusTwoMonths = getStartOfWeek(
+    new Date().setMonth(new Date(defaultTimeStart).getMonth() + 2)
+  );
+
+  let handleTimeChange = (
+    visibleTimeStart,
+    visibleTimeEnd,
+    updateScrollCanvas
+  ) => {
+    if (
+      visibleTimeStart < todayMinusTwoMonths &&
+      visibleTimeEnd > todayPlusTwoMonths
+    ) {
+      setVisibleTimeStart(todayMinusTwoMonths);
+      setVisibleTimeEnd(todayPlusTwoMonths);
+    } else if (
+      visibleTimeStart < todayMinusTwoMonths &&
+      visibleTimeEnd < todayPlusTwoMonths
+    ) {
+      setVisibleTimeStart(todayMinusTwoMonths);
+      setVisibleTimeEnd(visibleTimeEnd);
+    } else if (
+      visibleTimeEnd > todayPlusTwoMonths &&
+      visibleTimeStart > todayMinusTwoMonths
+    ) {
+      setVisibleTimeStart(visibleTimeStart);
+      setVisibleTimeEnd(todayPlusTwoMonths);
+    } else {
+      setVisibleTimeStart(visibleTimeStart);
+      setVisibleTimeEnd(visibleTimeEnd);
+    }
+  };
+
+  function jumpToToday() {
+    setVisibleTimeStart(new Date().setHours(0, 0, 0, 0));
+    setVisibleTimeEnd(new Date().setHours(24, 30, 0, 0));
+  }
+
+  function jumpToThisWeek() {
+    const startOfWeek = getStartOfWeek(new Date());
+    setVisibleTimeStart(startOfWeek);
+    setVisibleTimeEnd(
+      new Date(startOfWeek + 4 * 24 * 60 * 60 * 1000).setHours(24, 0, 0, 0)
+    );
+  }
+
+  function jumpToNextTwoWeeks() {
+    const startOfWeek = getStartOfWeek(new Date());
+    setVisibleTimeStart(startOfWeek);
+    setVisibleTimeEnd(
+      new Date(startOfWeek + 11 * 24 * 60 * 60 * 1000).setHours(24, 0, 0, 0)
+    );
+  }
+
   return (
     <>
+      <Stack spacing={"5px"} justifyContent="flex-end" direction="row">
+        <h5 style={{ justifyContent: "flex-end" }}>Jump To: </h5>
+        <Button variant="outlined" onClick={jumpToToday}>
+          Today
+        </Button>
+        <Button variant="outlined" onClick={jumpToThisWeek}>
+          This Week
+        </Button>
+        <Button variant="outlined" onClick={jumpToNextTwoWeeks}>
+          Next Two Weeks
+        </Button>
+      </Stack>
+      <br />
       <Timeline
         groups={employeeIDs}
         items={locationSchedule}
-        defaultTimeStart={moment().add(-7, "day")}
-        defaultTimeEnd={moment().add(14, "day")}
+        defaultTimeStart={defaultTimeStart}
+        defaultTimeEnd={defaultTimeEnd}
         lineHeight={lineHeight}
-        minZoom={60 * 60 * 1000}
-        maxZoom={365.24 * 86400 * 1000}
+        minZoom={60 * 60 * 1000 * 24}
         itemRenderer={itemRenderer}
         groupRenderer={groupRenderer}
+        visibleTimeStart={visibleTimeStart}
+        visibleTimeEnd={visibleTimeEnd}
+        onTimeChange={handleTimeChange}
       ></Timeline>
     </>
   );
