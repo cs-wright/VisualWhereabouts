@@ -4,7 +4,6 @@ import Timeline from "react-calendar-timeline";
 // make sure you include the timeline stylesheet or the timeline will not be styled
 import "react-calendar-timeline/lib/Timeline.css";
 import "../timelineStyling.css";
-import moment from "moment";
 
 import axios from "axios";
 import Avatar from "@mui/material/Avatar";
@@ -17,7 +16,7 @@ const baseURL = "https://whowhatwhere.azurewebsites.net";
 function getStartOfWeek(today) {
   today = new Date(today);
   var day = today.getDay(),
-    diff = today.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
+    diff = today.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
 
   return new Date(today.setDate(diff)).setHours(0, 0, 0, 0);
 }
@@ -114,7 +113,7 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
                 start_time: Date.parse(y.startDtm),
                 end_time: Date.parse(y.endDtm),
                 canChangeGroup: false, // Ensures that the user can't move a work status on their timeline to another users schedule.
-                isContactable: false,
+                locationMetaTypeId: y.locationMetaTypeId,
                 canMove: false,
                 canResize: false,
               };
@@ -140,21 +139,41 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
     const { left: leftResizeProps, right: rightResizeProps } = getResizeProps();
     //NOTE: Component requires that the background colour changes when a item is selected.
     //      Colour RGB minor change is required (not noticeable to the naked eye).
-    const bgColour = !(item.title === "Somewhere...")
-      ? "rgb(59, 140, 58)"
-      : "rgb(140, 58, 59)";
-    const backgroundColor = itemContext.selected
-      ? item.isContactable
-        ? "rgb(59, 141, 58)"
-        : "rgb(141, 58, 59)"
-      : bgColour;
+    let grey = "rgb(148,149,153)";
+    let blue = "rgb(47,135,175)";
+    let red = "rgb(175, 74, 47)";
+    let purple = "rgb(151, 47, 175)";
+    let yellow = "rgb(175, 151, 47)";
+    let green = "rgb(47, 175, 87)";
+
+    let bgColor;
+
+    if (item.locationMetaTypeId === -1) {
+      bgColor = blue;
+    } else if (item.locationMetaTypeId === -2) {
+      bgColor = purple;
+    } else if (item.locationMetaTypeId === -3) {
+      bgColor = red;
+    } else if (item.locationMetaTypeId === -4) {
+      bgColor = grey;
+    }
+
+    bgColor = itemContext.selected ? yellow : bgColor;
+    // const bgColour = !(item.title === "Somewhere...")
+    //   ? "rgb(59, 140, 58)"
+    //   : "rgb(140, 58, 59)";
+    // const backgroundColor = itemContext.selected
+    //   ? item.isContactable
+    //     ? "rgb(59, 141, 58)"
+    //     : "rgb(141, 58, 59)"
+    //   : bgColour;
     const borderColor = itemContext.selected ? "black" : "white";
 
     return (
       <div
         {...getItemProps({
           style: {
-            backgroundColor: backgroundColor,
+            backgroundColor: bgColor,
             borderColor: borderColor,
             color: "white", //Colour of the text in the timeline item.
             borderLeftWidth: itemContext.selected ? 4 : 1,
