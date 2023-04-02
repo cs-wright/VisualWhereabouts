@@ -28,7 +28,7 @@ export default function SelectButtonGroup({
         exclusive
         onChange={handleChange}
         aria-label="Platform"
-        fullWidth={true}
+        fullWidth={false}
       >
         <ToggleButton value={leftValue}>{leftName}</ToggleButton>
         <ToggleButton value={rightValue}>{rightName}</ToggleButton>

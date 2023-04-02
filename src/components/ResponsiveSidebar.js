@@ -130,6 +130,11 @@ export default function ResponsiveSidebar(props) {
           >
             <MenuIcon />
           </IconButton>
+          <img
+            src="bisLogo.png"
+            style={{ height: "60px" }}
+            alt="Bluesmith Logo"
+          ></img>
           <Typography variant="h6" noWrap component="div">
             Visual Whereabouts
           </Typography>

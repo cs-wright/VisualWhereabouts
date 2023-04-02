@@ -10,6 +10,7 @@ import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
+import SelectButtonGroup from "./SelectButtonGroup";
 
 const baseURL = "https://whowhatwhere.azurewebsites.net";
 
@@ -24,6 +25,9 @@ function getStartOfWeek(today) {
 export default function TimelineView({ selectedSubGroup, selectedButton }) {
   const [locationSchedule, setLocationSchedule] = React.useState([]);
   const [employeeIDs, setEmployeeIDs] = React.useState([]);
+
+  // Declare a state used to store which schedule should be rendered workstatuses or locations.
+  const [selectedSchedule, setSelectedSchedule] = React.useState("workstatus");
 
   // Default view is the current work week (Monday -> Friday)
   const defaultTimeStart = getStartOfWeek(new Date());
@@ -93,7 +97,9 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
         );
 
         let employeeLocationApiRequest = idList.map((x) =>
-          axios.get(baseURL + "/api/persons/" + x.id + "/locations/all")
+          axios.get(
+            baseURL + "/api/persons/" + x.id + "/" + selectedSchedule + "/all"
+          )
         );
 
         axios.all(employeeLocationApiRequest).then((response) => {
@@ -106,7 +112,8 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
             let timelineItems = x.data.map((y) => {
               timelineItemID++;
 
-              return {
+              // Put all the attributes that both schedule types share into an object.
+              let generic = {
                 id: timelineItemID,
                 group: employeeID,
                 title: y.shortName,
@@ -117,6 +124,20 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
                 canMove: false,
                 canResize: false,
               };
+
+              // Append the attributes unique to the selected schedule to the generic object before returning the newly formed object.
+              if (selectedSchedule === "locations") {
+                generic = {
+                  ...generic,
+                  locationMetaTypeId: y.locationMetaTypeId,
+                };
+              } else if (selectedSchedule === "workstatus") {
+                generic = {
+                  ...generic,
+                  isContactable: y.isContactable,
+                };
+              }
+              return generic;
             });
             return timelineItems;
           });
@@ -127,7 +148,7 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
         });
       });
     });
-  }, [selectedSubGroup, selectedButton, setLocationSchedule]);
+  }, [selectedSubGroup, selectedButton, setLocationSchedule, selectedSchedule]);
 
   console.log(locationSchedule);
   if (!locationSchedule) {
@@ -148,25 +169,27 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
 
     let bgColor;
 
-    if (item.locationMetaTypeId === -1) {
-      bgColor = blue;
-    } else if (item.locationMetaTypeId === -2) {
-      bgColor = purple;
-    } else if (item.locationMetaTypeId === -3) {
-      bgColor = red;
-    } else if (item.locationMetaTypeId === -4) {
-      bgColor = grey;
+    if (selectedSchedule === "locations") {
+      if (item.locationMetaTypeId === -1) {
+        bgColor = blue;
+      } else if (item.locationMetaTypeId === -2) {
+        bgColor = purple;
+      } else if (item.locationMetaTypeId === -3) {
+        bgColor = red;
+      } else if (item.locationMetaTypeId === -4) {
+        bgColor = grey;
+      }
+    } else if (selectedSchedule === "workstatus") {
+      if (item.isContactable === true) {
+        bgColor = green;
+      } else if (item.isContactable === false) {
+        bgColor = red;
+      } else {
+        bgColor = grey;
+      }
     }
 
     bgColor = itemContext.selected ? yellow : bgColor;
-    // const bgColour = !(item.title === "Somewhere...")
-    //   ? "rgb(59, 140, 58)"
-    //   : "rgb(140, 58, 59)";
-    // const backgroundColor = itemContext.selected
-    //   ? item.isContactable
-    //     ? "rgb(59, 141, 58)"
-    //     : "rgb(141, 58, 59)"
-    //   : bgColour;
     const borderColor = itemContext.selected ? "black" : "white";
 
     return (
@@ -265,19 +288,40 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
     );
   }
 
+  const viewLeftValue = "workstatus";
+  const viewLeftName = "Work Statuses";
+  const viewRightName = "Locations";
+  const viewRightValue = "locations";
+
   return (
     <>
-      <Stack spacing={"5px"} justifyContent="flex-end" direction="row">
-        <h5 style={{ justifyContent: "flex-end" }}>Jump To: </h5>
-        <Button variant="outlined" onClick={jumpToToday}>
-          Today
-        </Button>
-        <Button variant="outlined" onClick={jumpToThisWeek}>
-          This Week
-        </Button>
-        <Button variant="outlined" onClick={jumpToNextTwoWeeks}>
-          Next Two Weeks
-        </Button>
+      <Stack direction="column" spacing={2}>
+        <Stack direction="row" justifyContent="flex-end" spacing={2}>
+          <h5 style={{ justifyContent: "flex-end" }}>Select Schedule: </h5>
+
+          <SelectButtonGroup
+            {...{
+              selectedButton: selectedSchedule,
+              setSelectedButton: setSelectedSchedule,
+              leftValue: viewLeftValue,
+              leftName: viewLeftName,
+              rightValue: viewRightValue,
+              rightName: viewRightName,
+            }}
+          />
+        </Stack>
+        <Stack spacing={"5px"} justifyContent="flex-end" direction="row">
+          <h5 style={{ justifyContent: "flex-end" }}>Jump To: </h5>
+          <Button variant="outlined" onClick={jumpToToday}>
+            Today
+          </Button>
+          <Button variant="outlined" onClick={jumpToThisWeek}>
+            This Week
+          </Button>
+          <Button variant="outlined" onClick={jumpToNextTwoWeeks}>
+            Next Two Weeks
+          </Button>
+        </Stack>
       </Stack>
       <br />
       <Timeline
