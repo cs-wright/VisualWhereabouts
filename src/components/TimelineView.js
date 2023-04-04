@@ -10,6 +10,8 @@ import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
+
+import TimelineItemModal from "./TimelineItemModal";
 import SelectButtonGroup from "./SelectButtonGroup";
 
 const baseURL = "https://whowhatwhere.azurewebsites.net";
@@ -26,8 +28,12 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
   const [locationSchedule, setLocationSchedule] = React.useState([]);
   const [employeeIDs, setEmployeeIDs] = React.useState([]);
 
+  const [selectedItem, setSelectedItem] = React.useState([]);
+
   // Declare a state used to store which schedule should be rendered workstatuses or locations.
   const [selectedSchedule, setSelectedSchedule] = React.useState("workstatus");
+  const [scheduleValuesArray, setScheduleValuesArray] = React.useState([]);
+  const [refreshState, setRefreshState] = React.useState(null);
 
   // Default view is the current work week (Monday -> Friday)
   const defaultTimeStart = getStartOfWeek(new Date());
@@ -145,12 +151,28 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
           locationsArray = locationsArray.flat(1);
 
           setLocationSchedule(locationsArray);
+          let scheduleType =
+            selectedSchedule === "workstatus" ? "workstatuses" : "locations";
+          axios.get(baseURL + "/api/" + scheduleType).then((response) => {
+            setScheduleValuesArray(
+              response.data.map((x) => {
+                return { id: x.id, value: x.shortName };
+              })
+            );
+            console.log(refreshState);
+          });
         });
       });
     });
-  }, [selectedSubGroup, selectedButton, setLocationSchedule, selectedSchedule]);
+  }, [
+    selectedSubGroup,
+    selectedButton,
+    setLocationSchedule,
+    selectedSchedule,
+    setScheduleValuesArray,
+    refreshState,
+  ]);
 
-  console.log(locationSchedule);
   if (!locationSchedule) {
     return <h1>Something went wrong</h1>;
   }
@@ -288,6 +310,14 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
     );
   }
 
+  let handleItemClick = (id, event, time) => {
+    setSelectedItem([id]);
+  };
+
+  let handleItemDeselect = (event) => {
+    setSelectedItem([]);
+  };
+
   const viewLeftValue = "workstatus";
   const viewLeftName = "Work Statuses";
   const viewRightName = "Locations";
@@ -336,7 +366,30 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
         visibleTimeStart={visibleTimeStart}
         visibleTimeEnd={visibleTimeEnd}
         onTimeChange={handleTimeChange}
+        selected={selectedItem}
+        onItemSelect={handleItemClick}
+        onItemClick={handleItemClick}
+        onItemDeselect={handleItemDeselect}
+        fullUpdate
       ></Timeline>
+      {selectedItem[0] && (
+        <TimelineItemModal
+          key={selectedItem[0]}
+          employeeArray={employeeIDs}
+          selectedItem={selectedItem}
+          setSelectedItem={setSelectedItem}
+          currentemployeeID={
+            locationSchedule.find((obj) => obj.id === selectedItem[0]).group
+          }
+          scheduleItemValue={
+            locationSchedule.find((obj) => obj.id === selectedItem[0]).title
+          }
+          scheduleType={selectedSchedule}
+          scheduleValuesArray={scheduleValuesArray}
+          scheduleArray={locationSchedule}
+          setRefreshState={setRefreshState}
+        />
+      )}
     </>
   );
 }
