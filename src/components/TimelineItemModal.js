@@ -14,7 +14,8 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import "dayjs/locale/en-gb";
 
 import dayjs from "dayjs";
-import axios from "axios";
+//import axios from "axios";
+import api from "../api";
 
 function FieldSelector({
   fieldName,
@@ -35,7 +36,7 @@ function FieldSelector({
     setSelectedValue(event.target.value);
   };
   return (
-    <FormControl sx={{ m: 1, minWidth: 120 }} disabled={disableEditing}>
+    <FormControl sx={{ m: 1, width: "45%" }} disabled={disableEditing}>
       <InputLabel id="demo-simple-select-helper-label">{fieldName}</InputLabel>
       <Select
         labelId="demo-simple-select-helper-label"
@@ -100,7 +101,6 @@ export default function TimelineItemModal({
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 400,
     bgcolor: "background.paper",
     border: "2px solid #000",
     boxShadow: 24,
@@ -137,7 +137,7 @@ export default function TimelineItemModal({
     }
 
     console.log(requestURL);
-    axios.get(requestURL).then((response) => {
+    api.get(requestURL).then((response) => {
       console.log(response);
       setRefreshState(response);
       handleCloseModal();
@@ -157,53 +157,69 @@ export default function TimelineItemModal({
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Button onClick={handleCloseModal}>X</Button>
-          <h1>Test</h1>
-          <FieldSelector
-            key="EmployeeFieldSelector"
-            fieldName="Employee"
-            records={employeeArray}
-            disableEditing={true}
-            selectedValue={employeeRecord}
-            setSelectedValue={setEmployeeRecord}
-          />
+          <div>
+            <Button onClick={handleCloseModal} sx={{ float: "right" }}>
+              X
+            </Button>
+            <h2>Update Schedule</h2>
+          </div>
 
-          <FieldSelector
-            key="statusFieldSelector"
-            fieldName={scheduleType}
-            records={scheduleValuesArray}
-            disableEditing={false}
-            selectedValue={scheduleStatus}
-            setSelectedValue={setScheduleStatus}
-          />
-
-          {scheduleType !== "locations" && (
+          <div>
             <FieldSelector
-              key="IsContactableFieldSelector"
-              fieldName={"Is Contactable?"}
-              records={[
-                { id: 0, value: "False" },
-                { id: 1, value: "True" },
-              ]}
-              disableEditing={false}
-              selectedValue={statusIsContactable}
-              setSelectedValue={setStatusIsContactable}
+              key="EmployeeFieldSelector"
+              fieldName="Employee"
+              records={employeeArray}
+              disableEditing={true}
+              selectedValue={employeeRecord}
+              setSelectedValue={setEmployeeRecord}
             />
-          )}
+          </div>
+          <div>
+            <FieldSelector
+              key="statusFieldSelector"
+              fieldName={scheduleType}
+              records={scheduleValuesArray}
+              disableEditing={false}
+              selectedValue={scheduleStatus}
+              setSelectedValue={setScheduleStatus}
+            />
 
-          <DateTimePicker
-            label="Start Time"
-            value={statusStartTime}
-            onChange={(newValue) => setStatusStartTime(newValue)}
-          />
+            {scheduleType !== "locations" && (
+              <FieldSelector
+                key="IsContactableFieldSelector"
+                fieldName={"Is Contactable?"}
+                records={[
+                  { id: 0, value: "False" },
+                  { id: 1, value: "True" },
+                ]}
+                disableEditing={false}
+                selectedValue={statusIsContactable}
+                setSelectedValue={setStatusIsContactable}
+              />
+            )}
+          </div>
 
-          <DateTimePicker
-            label="End Time"
-            value={statusEndTime}
-            onChange={(newValue) => setStatusEndTime(newValue)}
-          />
-          <Button onClick={handleCloseModal}>Cancel</Button>
-          <Button onClick={handleSaveChanges}>Save Changes</Button>
+          <div>
+            <DateTimePicker
+              sx={{ m: 1, width: "45%" }}
+              label="Start Time"
+              value={statusStartTime}
+              onChange={(newValue) => setStatusStartTime(newValue)}
+            />
+
+            <DateTimePicker
+              sx={{ m: 1, width: "45%" }}
+              label="End Time"
+              value={statusEndTime}
+              onChange={(newValue) => setStatusEndTime(newValue)}
+            />
+          </div>
+          <div>
+            <Button onClick={handleCloseModal}>Cancel</Button>
+            <Button onClick={handleSaveChanges} style={{ float: "right" }}>
+              Save Changes
+            </Button>
+          </div>
         </Box>
       </Modal>
     </LocalizationProvider>

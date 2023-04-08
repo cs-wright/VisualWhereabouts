@@ -6,6 +6,7 @@ import "react-calendar-timeline/lib/Timeline.css";
 import "../timelineStyling.css";
 
 import axios from "axios";
+import api from "../api";
 import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
 import Stack from "@mui/material/Stack";
@@ -61,7 +62,7 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
 
     // Get all members of the selected sub groups and their children.
     const results = selectedSubGroup.map((x) =>
-      axios.get(baseURL + "/api/persons/" + hierarchy + "/" + x + "/all")
+      api.get("/api/persons/" + hierarchy + "/" + x + "/all")
     );
 
     axios.all(results).then((response) => {
@@ -82,7 +83,7 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
       });
 
       const getEmployeeDetailsFromAPI = idList.map((x) =>
-        axios.get(baseURL + "/api/persons/" + x.id)
+        api.get("/api/persons/" + x.id)
       );
 
       axios.all(getEmployeeDetailsFromAPI).then((apiResponse) => {
@@ -103,9 +104,7 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
         );
 
         let employeeLocationApiRequest = idList.map((x) =>
-          axios.get(
-            baseURL + "/api/persons/" + x.id + "/" + selectedSchedule + "/all"
-          )
+          api.get("/api/persons/" + x.id + "/" + selectedSchedule + "/all")
         );
 
         axios.all(employeeLocationApiRequest).then((response) => {
@@ -153,7 +152,7 @@ export default function TimelineView({ selectedSubGroup, selectedButton }) {
           setLocationSchedule(locationsArray);
           let scheduleType =
             selectedSchedule === "workstatus" ? "workstatuses" : "locations";
-          axios.get(baseURL + "/api/" + scheduleType).then((response) => {
+          api.get("/api/" + scheduleType).then((response) => {
             setScheduleValuesArray(
               response.data.map((x) => {
                 return { id: x.id, value: x.shortName };

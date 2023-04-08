@@ -3,9 +3,10 @@ import TreeView from "@mui/lab/TreeView";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TreeItem from "@mui/lab/TreeItem";
-import axios from "axios";
+//import axios from "axios";
+import api from "../api";
 
-const baseURL = "https://whowhatwhere.azurewebsites.net";
+//const baseURL = "https://whowhatwhere.azurewebsites.net";
 
 export default function HierarchyExplorer({
   selectedSubGroup,
@@ -14,7 +15,7 @@ export default function HierarchyExplorer({
   setHierarchyContents,
   selectedButton,
 }) {
-  let selectedHierarchy = baseURL + selectedButton;
+  let selectedHierarchy = selectedButton;
 
   const handleSelectSubGroup = (event, nodeIds) => {
     setSelectedSubGroup(nodeIds);
@@ -22,7 +23,7 @@ export default function HierarchyExplorer({
 
   // Request the contents of the selected hierarchy from the API.
   React.useEffect(() => {
-    axios.get(selectedHierarchy).then((response) => {
+    api.get(selectedHierarchy).then((response) => {
       setHierarchyContents(response.data);
     });
   }, [selectedHierarchy, setHierarchyContents]);
