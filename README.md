@@ -1,10 +1,13 @@
-# Getting Started with Create React App
+# Visual Whereabouts
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Introduction
 
-## Available Scripts
+This application was developed to replace the SharePoint Lists whereabouts. It allows its users to view the upcoming schedules of their co-workers. Users can either view a timeline containing the scheduled work statuses or locations of their co-workers and make changes to scheduled events from the timeline via an update modal.
+The application is built for a desktop environment but features responsive components that will provide a mobile-friendly user experience.
 
-In the project directory, you can run:
+## Scripts
+
+While in the project directory:
 
 ### `npm start`
 
@@ -12,59 +15,56 @@ Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
 ### `npm run build`
 
 Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+It bundles the code in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The build is minified and ready to be deployed.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## WhoWhatWhere API
 
-### `npm run eject`
+The application sources all of its data from the WhoWhatWhere API, which bridges the gap between the application and a SQL database holding all the data required to run the application.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+All of the content is dynamically loaded. If the hierarchy contents changes in the database, that will be reflected in the application after a refresh.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Routes used
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Below is a list of the API routes used by the application. The application will handle changes such as the extra attributes being returned, but it will not tolerate attributes being removed; this should be taken into consideration if altering the existing routes in the API.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- `/api/persons/`
+- `/api/persons/<id>`
+- `/api/teams/<id>/all`
+- `/api/locations/<id>/all`
+- `/api/teams/hierarchy`
+- `/api/teams/locations`
+- `/api/persons/<id>/workstatus/all`
+- `/api/persons/<id>/locations/all`
+- `/api/persons/<id>/locations/<locationID>/range/<startDTM>/<endDTM>`
+- `/api/persons/<id>/workstatus/<locationID>/range/<startDTM>/<endDTM>`
 
-## Learn More
+## IP Whitelisting
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+For the time being, only traffic originating from a Bluesmith IP address is accepted by the API, meaning that if you run the application locally or connect to the deployed version, it will not render any data, and you will be presented with a "Failed to load hierarchies" message.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+To rectify this, ensure you are on the BIS network (not the guest network) either physically or remotely via your VPN.
 
-### Code Splitting
+## Changing the Base URL of the API
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+[Axios](https://axios-http.com/docs/intro) is used to handle all requests to the WhoWhatWhere API. For simplicity, a single Axios instance is declared in a file called `/src/api.js`. To point the application at a different location alter the value of the `baseURL` attribute in the format:
+`https://<baseURL>`
 
-### Analyzing the Bundle Size
+Do not put a `/` at the end of the URL, or include the `/api` route as part of the baseURL.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Timeline item colouring
 
-### Making a Progressive Web App
+The colours of an item depend on the values of the attributes provided in the table below:
+![Item Colours](itemColours.png)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Contributing
 
-### Advanced Configuration
+Anyone is welcome to contribute to this project. Either create a backlog item for a feature you would like to see in the future, or if you would rather attempt to implement the feature yourself, then create a new branch off master with the following format `/feature/<initials>/<workitemID>_<Short name>`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Create a pull request and assign two active developers to review your code once the work has been completed.
+If approved, the code changes will deploy to the live version of the application automatically shortly after the merge.
